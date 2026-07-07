@@ -8,7 +8,7 @@
     <version>2.0.x.20260630-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
-    <description>OkHttp3 Extensions - SSL, Interceptor, Cookie and more</description>
+    <description>OkHttp3 Extensions - independent of Spring Boot, JDK 17 line</description>
     <url>https://github.com/hiwepy/${project.artifactId}</url>
 
     <licenses>
