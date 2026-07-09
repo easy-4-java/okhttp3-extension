@@ -76,18 +76,18 @@
 
         <!-- Maven -->
         <maven.version>3.0</maven.version>
-        <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
-        <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
-        <maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>
+        <maven-clean-plugin.version>4.0.0</maven-clean-plugin.version>
+        <maven-compiler-plugin.version>4.0.0</maven-compiler-plugin.version>
+        <maven-deploy-plugin.version>4.0.0</maven-deploy-plugin.version>
         <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
-        <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
-        <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
+        <maven-install-plugin.version>4.0.0</maven-install-plugin.version>
+        <maven-jar-plugin.version>4.0.0</maven-jar-plugin.version>
         <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
         <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
-        <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
+        <maven-resources-plugin.version>4.0.0</maven-resources-plugin.version>
         <maven-surefire-plugin.version>3.6.0</maven-surefire-plugin.version>
-        <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
+        <maven-source-plugin.version>4.0.0</maven-source-plugin.version>
         <maven-central-publishing-plugin.version>0.10.0</maven-central-publishing-plugin.version>
         <caffeine.version>3.2.4</caffeine.version>
         <checker-qual.version>4.2.1</checker-qual.version>
