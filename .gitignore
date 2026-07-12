@@ -1,34 +1,135 @@
-# Build output
-target/
-*.class
-*.jar
-*.war
-
-# IDE
-.idea/
+### IDE ###
 *.iml
-.vscode/
-.settings/
-.project
+*.ipr
+*.iws
+.idea/
 .classpath
 .factorypath
-*.swp
-*~
-.DS_Store
+.project
+.settings
+.springBeans
+.apt_generated
+.sts4-cache
+.metadata
+.recommenders
+rebel.xml
+.vscode/
 
-# Maven
-.mvn/
-mvnw
-mvnw.cmd
-pom.xml.tag
-pom.xml.releaseBackup
-pom.xml.versionsBackup
-pom.xml.next
-release.properties
+### Gradle ###
+.gradle
+!gradle/wrapper/gradle-wrapper.jar
+
+### Maven ###
+target/
 dependency-reduced-pom.xml
-buildNumber.properties
-.mvn/timing.properties
-.mvn/wrapper/maven-wrapper.jar
+pom.xml.versionsBackup
+.flattened-pom.xml
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
 
-# Logs
+### NetBeans ###
+nbproject/private/
+nbbuild/
+nbdist/
+.nb-gradle/
+dist/
+
+### Build ###
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+build.log
+bin/
+lib/
+codes/
+/code
+gen_code
+
+### Logs ###
+logs/
 *.log
+log.*/
+transaction-logs
+
+### Archives ###
+*.jar
+*.war
+*.ear
+*.tar
+*.gz
+!/libs/*.jar
+
+### Temporary files ###
+*#
+*.sw?
+*~
+.#*
+.*.md.html
+*.cache
+*.diff
+*.patch
+*.tmp
+*.java~
+*.properties~
+*.xml~
+
+### System files ###
+.DS_Store
+Thumbs.db
+Servers
+
+### Application specific ###
+MANIFEST.MF
+_site/
+activemq-data
+dump.rdb
+interpolated*.xml
+manifest.yml
+overridedb.*
+secrets.yml
+upload
+
+### Node / Frontend ###
+node_modules/
+**/.output/
+**/.vite/
+**/.cache/
+**/.parcel-cache/
+**/*.tsbuildinfo
+**/.env.local
+**/.env.*.local
+**/coverage/
+**/storybook-static/
+**/boba-tea-shop/supervisor-agent/**/static/
+
+### Python ###
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+
+### Docs ###
+docs/_build
+
+### Rust ###
+Cargo.lock
+
+### Server ###
+/server/nacos-server/data
+/server/nacos-server/logs
+
+### AI / vibe coding ###
+.claude
+openspec
+AGENTS.md
+CLAUDE.md
+.agentscope/
+**/*.db
+
+### Development tools ###
+.fastRequest
+*.http
+*.json
+qodana.yaml
