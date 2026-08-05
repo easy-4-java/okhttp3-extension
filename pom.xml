@@ -56,7 +56,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- Dependencies -->
-        <okhttp.version>5.4.0</okhttp.version>
+        <okhttp.version>4.12.0</okhttp.version>
         <jackson.version>2.22.1</jackson.version>
         <slf4j.version>2.1.0</slf4j.version>
         <lombok.version>1.18.46</lombok.version>
