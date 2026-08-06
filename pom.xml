@@ -81,7 +81,10 @@
         <caffeine.version>3.2.4</caffeine.version>
         <checker-qual.version>4.2.1</checker-qual.version>
         <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
-    </properties>
+    
+		<junit.version>4.13.2</junit.version>
+		<junit-jupiter.version>6.1.0</junit-jupiter.version>
+		<commons-lang.version>2.6</commons-lang.version></properties>
 
     <!-- 依赖版本统一管理（dependencyManagement） -->
     <dependencyManagement>
@@ -130,12 +133,12 @@
             <dependency>
                 <groupId>com.squareup.okhttp3</groupId>
                 <artifactId>okhttp</artifactId>
-            <version>4.9.3</version></dependency>
+            <version>${okhttp.version}</version></dependency>
             <!-- For Jackson -->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-            <version>2.17.2</version></dependency>
+            <version>${jackson.version}</version></dependency>
         </dependencies>
     </dependencyManagement>
 
