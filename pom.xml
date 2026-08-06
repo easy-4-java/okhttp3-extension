@@ -24,10 +24,11 @@
         <tag>${project.artifactId}</tag>
     </scm>
 
-    <developers>
+        <developers>
         <developer>
-            <name>hiwepy</name>
+            <name>Loong Wan</name>
             <email>hiwepy@gmail.com</email>
+            <url>https://github.com/loong10k</url>
             <roles>
                 <role>developer</role>
             </roles>
