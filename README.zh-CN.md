@@ -2,6 +2,8 @@
 
 [English](./README.md) | [简体中文](./README.zh-CN.md)
 
+[![Java](https://img.shields.io/badge/Java-17-orange)](https://github.com/easy-4-java/okhttp3-extension) [![License](https://img.shields.io/badge/license-Apache%202.0-green)](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
 纯 Java OkHttp 3/4 扩展层：SSL 工具、CookieJar、拦截器与响应工具类
 
 > **当前分支**：`feature/2.0.x`
