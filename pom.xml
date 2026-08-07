@@ -52,7 +52,7 @@
 
     <!-- 版本属性定义：Java 版本、依赖版本与 Maven 插件版本统一管理 -->
     <properties>
-        <central-publishing-maven-plugin.version>0.11.0</central-publishing-maven-plugin.version>
+        <central-maven-publishing-plugin.version>0.11.0</central-maven-publishing-plugin.version>
         <java.version>17</java.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -80,7 +80,7 @@
         <maven-central-publishing-plugin.version>0.11.0</maven-central-publishing-plugin.version>
         <caffeine.version>3.2.4</caffeine.version>
         <checker-qual.version>4.2.1</checker-qual.version>
-        <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
+        <maven-jacoco-plugin.version>0.8.15</maven-jacoco-plugin.version>
     
 		<junit.version>4.13.2</junit.version>
 		<junit-jupiter.version>6.1.0</junit-jupiter.version>
@@ -411,7 +411,7 @@
                 <!-- 覆盖率插件：生成覆盖率报告并校验测试覆盖率（目标 90%） -->
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco-maven-plugin.version}</version>
+                <version>${maven-jacoco-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
