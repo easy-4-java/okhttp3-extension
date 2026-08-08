@@ -15,8 +15,11 @@
  */
 package okhttp3.extension.cache;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
@@ -28,15 +31,22 @@ import okhttp3.HttpUrl;
  */
 public class PersistenceCookieJar implements CookieJar {
     
-	List<Cookie> cache = new ArrayList<>();
+	private final ConcurrentMap<CookieKey, Cookie> cache = new ConcurrentHashMap<>();
 
     /*
      * Http请求结束，Response中有Cookie时候回调
      */
     @Override
     public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
-        // 内存中缓存Cookie
-        cache.addAll(cookies);
+        long now = System.currentTimeMillis();
+        for (Cookie cookie : cookies) {
+            CookieKey key = CookieKey.from(cookie);
+            if (cookie.expiresAt() <= now) {
+                cache.remove(key);
+            } else {
+                cache.put(key, cookie);
+            }
+        }
     }
 
     /*
@@ -44,23 +54,52 @@ public class PersistenceCookieJar implements CookieJar {
      */
     @Override
     public List<Cookie> loadForRequest(HttpUrl url) {
-        // 过期的Cookie
-        List<Cookie> invalidCookies = new ArrayList<>();
-        // 有效的Cookie
-        List<Cookie> validCookies = new ArrayList<>();
-        for (Cookie cookie : cache) {
-            if (cookie.expiresAt() < System.currentTimeMillis()) {
-                //判断是否过期
-                invalidCookies.add(cookie);
+        long now = System.currentTimeMillis();
+        List<Cookie> validCookies = new java.util.ArrayList<>();
+        cache.forEach((key, cookie) -> {
+            if (cookie.expiresAt() <= now) {
+                cache.remove(key, cookie);
             } else if (cookie.matches(url)) {
-                //匹配Cookie对应url
                 validCookies.add(cookie);
             }
-        }
-        // 缓存中移除过期的Cookie
-        cache.removeAll(invalidCookies);
-        // 返回List<Cookie>让Request进行设置
-        return validCookies;
+        });
+        return validCookies.isEmpty()
+                ? Collections.emptyList()
+                : Collections.unmodifiableList(new java.util.ArrayList<>(validCookies));
     }
-    
+
+    private static final class CookieKey {
+        private final String name;
+        private final String domain;
+        private final String path;
+
+        private CookieKey(String name, String domain, String path) {
+            this.name = name;
+            this.domain = domain;
+            this.path = path;
+        }
+
+        private static CookieKey from(Cookie cookie) {
+            return new CookieKey(cookie.name(), cookie.domain(), cookie.path());
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (!(object instanceof CookieKey)) {
+                return false;
+            }
+            CookieKey cookieKey = (CookieKey) object;
+            return Objects.equals(name, cookieKey.name)
+                    && Objects.equals(domain, cookieKey.domain)
+                    && Objects.equals(path, cookieKey.path);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, domain, path);
+        }
+    }
 }

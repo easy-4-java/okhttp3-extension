@@ -5,11 +5,12 @@ import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 /**
  * A {@link CookieJar} that delegates to multiple cookie jars.
@@ -17,10 +18,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public class NestedCookieJar implements CookieJar {
 
-    private List<CookieJar> cookieJars;
+    private final List<CookieJar> cookieJars;
 
     public NestedCookieJar(List<CookieJar> cookieJars) {
-        this.cookieJars = cookieJars;
+        this.cookieJars = cookieJars == null
+                ? Collections.emptyList()
+                : Collections.unmodifiableList(new ArrayList<>(cookieJars));
     }
 
     @Override
@@ -42,7 +45,7 @@ public class NestedCookieJar implements CookieJar {
         if (cookieJars == null || cookieJars.isEmpty()) {
             return Collections.emptyList();
         }
-        Map<String, Cookie> cookieMap = new HashMap<>();
+        Map<CookieKey, Cookie> cookieMap = new LinkedHashMap<>();
         for (CookieJar cookieJar : cookieJars) {
             try {
                 List<Cookie> cookies = cookieJar.loadForRequest(url);
@@ -51,7 +54,7 @@ public class NestedCookieJar implements CookieJar {
                 }
                 for (Cookie cookie : cookies) {
                     if (cookie.matches(url) && cookie.expiresAt() >= System.currentTimeMillis()) {
-                        cookieMap.put(cookie.name(), cookie);
+                        cookieMap.put(CookieKey.from(cookie), cookie);
                     }
                 }
             } catch (Exception e) {
@@ -61,6 +64,41 @@ public class NestedCookieJar implements CookieJar {
         if (cookieMap.isEmpty()) {
             return Collections.emptyList();
         }
-        return cookieMap.values().stream().collect(Collectors.toList());
+        return Collections.unmodifiableList(new ArrayList<>(cookieMap.values()));
+    }
+
+    private static final class CookieKey {
+        private final String name;
+        private final String domain;
+        private final String path;
+
+        private CookieKey(String name, String domain, String path) {
+            this.name = name;
+            this.domain = domain;
+            this.path = path;
+        }
+
+        private static CookieKey from(Cookie cookie) {
+            return new CookieKey(cookie.name(), cookie.domain(), cookie.path());
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (!(object instanceof CookieKey)) {
+                return false;
+            }
+            CookieKey cookieKey = (CookieKey) object;
+            return Objects.equals(name, cookieKey.name)
+                    && Objects.equals(domain, cookieKey.domain)
+                    && Objects.equals(path, cookieKey.path);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, domain, path);
+        }
     }
 }
