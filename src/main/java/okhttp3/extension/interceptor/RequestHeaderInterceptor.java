@@ -6,6 +6,9 @@ import okhttp3.Request.Builder;
 import okhttp3.Response;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -14,11 +17,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 public class RequestHeaderInterceptor implements RequestInterceptor {
 
-    private AtomicBoolean enabled = new AtomicBoolean(false);
-    private RequestHeaderProvider headerProvider;
+    private final AtomicBoolean enabled = new AtomicBoolean(false);
+    private final RequestHeaderProvider headerProvider;
 
     public RequestHeaderInterceptor(RequestHeaderProvider headerProvider) {
-        this.headerProvider = headerProvider;
+        this.headerProvider = Objects.requireNonNull(headerProvider, "headerProvider");
         this.enabled.set(true);
     }
 
@@ -41,7 +44,11 @@ public class RequestHeaderInterceptor implements RequestInterceptor {
         }
         Request originalRequest = chain.request();
         Builder builder = originalRequest.newBuilder();
-        for (HeaderEntry entry : headerProvider.getHeaders()) {
+        List<HeaderEntry> headers = headerProvider.getHeaders();
+        for (HeaderEntry entry : headers == null ? Collections.<HeaderEntry>emptyList() : headers) {
+            if (entry == null) {
+                continue;
+            }
             builder = setHeader(originalRequest, builder, entry.getName(), entry.getValue());
         }
         return chain.proceed(builder.build());
@@ -49,10 +56,9 @@ public class RequestHeaderInterceptor implements RequestInterceptor {
 
     protected Builder setHeader(Request request, Builder builder, String key, String value) {
         if (value != null && !value.trim().isEmpty()) {
-            boolean match = request.headers().names().stream().anyMatch(item -> item.equalsIgnoreCase(key));
-            if (!match) {
+            if (request.header(key) == null) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Set HTTP HEADER: {}:{}.", key, value);
+                    log.debug("Set HTTP header: {}", key);
                 }
                 return builder.header(key, value);
             }
