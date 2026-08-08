@@ -59,12 +59,37 @@ public class CaffeineCacheCookieJar implements CookieJar {
                 cookies.add(cookie);
             }
         });
-        return cookies.isEmpty() ? Collections.emptyList() : List.copyOf(cookies);
+        return cookies.isEmpty() ? Collections.emptyList() : Collections.unmodifiableList(cookies);
     }
 
-    private record CookieKey(String name, String domain, String path) {
+    private static final class CookieKey {
+        private final String name;
+        private final String domain;
+        private final String path;
+
+        private CookieKey(String name, String domain, String path) {
+            this.name = name;
+            this.domain = domain;
+            this.path = path;
+        }
+
         private static CookieKey from(Cookie cookie) {
             return new CookieKey(cookie.name(), cookie.domain(), cookie.path());
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof CookieKey)) return false;
+            CookieKey that = (CookieKey) o;
+            return Objects.equals(name, that.name)
+                && Objects.equals(domain, that.domain)
+                && Objects.equals(path, that.path);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, domain, path);
         }
     }
 }

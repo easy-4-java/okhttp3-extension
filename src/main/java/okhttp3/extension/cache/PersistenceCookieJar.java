@@ -62,12 +62,37 @@ public class PersistenceCookieJar implements CookieJar {
                 validCookies.add(cookie);
             }
         });
-        return validCookies.isEmpty() ? Collections.emptyList() : List.copyOf(validCookies);
+        return validCookies.isEmpty() ? Collections.emptyList() : Collections.unmodifiableList(validCookies);
     }
 
-    private record CookieKey(String name, String domain, String path) {
+    private static final class CookieKey {
+        private final String name;
+        private final String domain;
+        private final String path;
+
+        private CookieKey(String name, String domain, String path) {
+            this.name = name;
+            this.domain = domain;
+            this.path = path;
+        }
+
         private static CookieKey from(Cookie cookie) {
             return new CookieKey(cookie.name(), cookie.domain(), cookie.path());
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof CookieKey)) return false;
+            CookieKey that = (CookieKey) o;
+            return java.util.Objects.equals(name, that.name)
+                && java.util.Objects.equals(domain, that.domain)
+                && java.util.Objects.equals(path, that.path);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(name, domain, path);
         }
     }
 }

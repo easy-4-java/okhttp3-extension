@@ -5,6 +5,7 @@ import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -19,7 +20,7 @@ public class NestedCookieJar implements CookieJar {
     private final List<CookieJar> cookieJars;
 
     public NestedCookieJar(List<CookieJar> cookieJars) {
-        this.cookieJars = cookieJars == null ? Collections.emptyList() : List.copyOf(cookieJars);
+        this.cookieJars = cookieJars == null ? Collections.emptyList() : Collections.unmodifiableList(cookieJars);
     }
 
     @Override
@@ -60,12 +61,37 @@ public class NestedCookieJar implements CookieJar {
         if (cookieMap.isEmpty()) {
             return Collections.emptyList();
         }
-        return List.copyOf(cookieMap.values());
+        return Collections.unmodifiableList(new ArrayList<>(cookieMap.values()));
     }
 
-    private record CookieKey(String name, String domain, String path) {
+    private static final class CookieKey {
+        private final String name;
+        private final String domain;
+        private final String path;
+
+        private CookieKey(String name, String domain, String path) {
+            this.name = name;
+            this.domain = domain;
+            this.path = path;
+        }
+
         private static CookieKey from(Cookie cookie) {
             return new CookieKey(cookie.name(), cookie.domain(), cookie.path());
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof CookieKey)) return false;
+            CookieKey that = (CookieKey) o;
+            return java.util.Objects.equals(name, that.name)
+                && java.util.Objects.equals(domain, that.domain)
+                && java.util.Objects.equals(path, that.path);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(name, domain, path);
         }
     }
 }
