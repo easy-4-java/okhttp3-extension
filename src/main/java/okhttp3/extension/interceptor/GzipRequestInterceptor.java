@@ -13,10 +13,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class GzipRequestInterceptor implements RequestInterceptor {
 
-    private AtomicBoolean enabled = new AtomicBoolean(false);
+    private static final long DEFAULT_MINIMUM_BODY_BYTES = 1_024L;
+
+    private final AtomicBoolean enabled = new AtomicBoolean(false);
+    private final long minimumBodyBytes;
 
     public GzipRequestInterceptor(boolean enabled) {
+        this(enabled, DEFAULT_MINIMUM_BODY_BYTES);
+    }
+
+    public GzipRequestInterceptor(boolean enabled, long minimumBodyBytes) {
         this.enabled.set(enabled);
+        this.minimumBodyBytes = Math.max(0L, minimumBodyBytes);
     }
 
     public void enable() {
@@ -38,7 +46,12 @@ public class GzipRequestInterceptor implements RequestInterceptor {
         }
         Request originalRequest = chain.request();
         RequestBody body = originalRequest.body();
-        if (body == null || originalRequest.header("Content-Encoding") != null) {
+        if (body == null || originalRequest.header("Content-Encoding") != null
+                || body.isOneShot() || body.isDuplex()) {
+            return chain.proceed(originalRequest);
+        }
+        long contentLength = body.contentLength();
+        if (contentLength >= 0L && contentLength < minimumBodyBytes) {
             return chain.proceed(originalRequest);
         }
         Request compressedRequest = originalRequest.newBuilder()

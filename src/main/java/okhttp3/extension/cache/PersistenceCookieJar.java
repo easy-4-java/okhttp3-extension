@@ -15,8 +15,10 @@
  */
 package okhttp3.extension.cache;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
@@ -28,15 +30,22 @@ import okhttp3.HttpUrl;
  */
 public class PersistenceCookieJar implements CookieJar {
     
-	List<Cookie> cache = new ArrayList<>();
+	private final ConcurrentMap<CookieKey, Cookie> cache = new ConcurrentHashMap<>();
 
     /*
      * Http请求结束，Response中有Cookie时候回调
      */
     @Override
     public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
-        // 内存中缓存Cookie
-        cache.addAll(cookies);
+        long now = System.currentTimeMillis();
+        for (Cookie cookie : cookies) {
+            CookieKey key = CookieKey.from(cookie);
+            if (cookie.expiresAt() <= now) {
+                cache.remove(key);
+            } else {
+                cache.put(key, cookie);
+            }
+        }
     }
 
     /*
@@ -44,23 +53,21 @@ public class PersistenceCookieJar implements CookieJar {
      */
     @Override
     public List<Cookie> loadForRequest(HttpUrl url) {
-        // 过期的Cookie
-        List<Cookie> invalidCookies = new ArrayList<>();
-        // 有效的Cookie
-        List<Cookie> validCookies = new ArrayList<>();
-        for (Cookie cookie : cache) {
-            if (cookie.expiresAt() < System.currentTimeMillis()) {
-                //判断是否过期
-                invalidCookies.add(cookie);
+        long now = System.currentTimeMillis();
+        List<Cookie> validCookies = new java.util.ArrayList<>();
+        cache.forEach((key, cookie) -> {
+            if (cookie.expiresAt() <= now) {
+                cache.remove(key, cookie);
             } else if (cookie.matches(url)) {
-                //匹配Cookie对应url
                 validCookies.add(cookie);
             }
-        }
-        // 缓存中移除过期的Cookie
-        cache.removeAll(invalidCookies);
-        // 返回List<Cookie>让Request进行设置
-        return validCookies;
+        });
+        return validCookies.isEmpty() ? Collections.emptyList() : List.copyOf(validCookies);
     }
-    
+
+    private record CookieKey(String name, String domain, String path) {
+        private static CookieKey from(Cookie cookie) {
+            return new CookieKey(cookie.name(), cookie.domain(), cookie.path());
+        }
+    }
 }
