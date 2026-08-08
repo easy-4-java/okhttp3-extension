@@ -4,12 +4,12 @@
 
 [![Java](https://img.shields.io/badge/Java-8-orange)](https://github.com/easy-4-java/okhttp3-extension) [![License](https://img.shields.io/badge/license-Apache%202.0-green)](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-纯 Java OkHttp 3/4 扩展层：SSL 工具、CookieJar、拦截器与响应工具类
+纯 Java OkHttp 扩展层：SSL 工具、CookieJar、拦截器与响应工具类
 
 > **当前分支**：`feature/1.0.x`
 > **版本**：`1.0.x.20260630-SNAPSHOT`
 > **JDK 基线**：8
-> **项目状态**：维护中（1.0.x 线）。尚未发布 Maven Central；制品通过 Aliyun Maven 仓库与 GitHub Releases 分发。
+> **项目状态**：维护中（1.0.x 线）。快照制品通过阿里云 Maven 仓库分发。
 
 ## 目录
 
@@ -219,10 +219,10 @@ CookieJar jar = new PersistenceCookieJar() {
 mvn clean verify
 ```
 
-- 父 POM 通过 `maven-enforcer-plugin` 强制 Maven 与 JDK 8 基线。
+- POM 通过 `maven-enforcer-plugin` 强制 Maven 与 JDK 8 基线。
 - Surefire 配置为运行 `**/*Tests.java`，并排除 `**/TestBean.java` 辅助类。
-- JaCoCo 在 `verify` 阶段执行 `prepare-agent`、`report` 与 `check`，行覆盖率规则为 **90%**（`haltOnFailure=false`）。
-- 发布打包（`mvn -Prelease deploy`）附带 sources 与 javadoc 构件并执行 GPG 签名，对接 Sonatype Central Publishing；普通 `mvn deploy` 按版本后缀路由到 Aliyun Maven 仓库（见 `distributionManagement`）。
+- JaCoCo 在 `verify` 阶段执行 `prepare-agent`、`report` 与 `check`，行覆盖率规则为 **90%**（`haltOnFailure=true`）。
+- `mvn clean deploy -Prelease` 会附带 sources 与 javadoc 构件、执行 GPG 签名，并把 SNAPSHOT 制品发布到 `distributionManagement` 声明的阿里云 Maven 仓库。
 - `scripts/render-branch-pom.py` 按版本线重新生成分支专属 `pom.xml`（JDK 与依赖栈随线变化）。
 
 <a id="10-versioning--branches"></a>

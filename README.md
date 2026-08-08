@@ -4,13 +4,13 @@
 
 [![Java](https://img.shields.io/badge/Java-8-orange)](https://github.com/easy-4-java/okhttp3-extension) [![License](https://img.shields.io/badge/license-Apache%202.0-green)](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-Pure Java extension layer for OkHttp 3/4: SSL utilities, CookieJars, interceptors, response helpers
+Pure Java extension layer for OkHttp: SSL utilities, CookieJars, interceptors, response helpers
 [简体中文](./README.zh-CN.md)
 
 > **Current branch**: `feature/1.0.x`
 > **Version**: `1.0.x.20260630-SNAPSHOT`
 > **JDK baseline**: 8
-> **Project status**: maintenance (1.0.x line). Not yet published to Maven Central; artifacts are distributed via the Aliyun Maven repository and GitHub Releases.
+> **Project status**: maintenance (1.0.x line). Snapshot artifacts are distributed through the Aliyun Maven repository.
 
 ## Table of Contents
 
@@ -220,10 +220,10 @@ CookieJar jar = new PersistenceCookieJar() {
 mvn clean verify
 ```
 
-- The parent POM enforces Maven and JDK 8 baselines via `maven-enforcer-plugin`.
+- The POM enforces the Maven and JDK 8 baselines via `maven-enforcer-plugin`.
 - Surefire is configured to run `**/*Tests.java` classes and to exclude `**/TestBean.java` helpers.
-- JaCoCo runs `prepare-agent`, `report` and `check` on the `verify` phase with a **90% line-coverage** rule (`haltOnFailure=false`).
-- Release packaging (`mvn -Prelease deploy`) attaches sources and javadoc jars, GPG-signs artifacts and is wired for Sonatype Central Publishing; plain `mvn deploy` routes SNAPSHOT/release artifacts to the Aliyun Maven repository per `distributionManagement`.
+- JaCoCo runs `prepare-agent`, `report` and `check` on the `verify` phase with a **90% line-coverage** rule (`haltOnFailure=true`).
+- `mvn clean deploy -Prelease` attaches sources and javadoc jars, signs them with GPG, and deploys SNAPSHOT artifacts to the Aliyun Maven repository declared by `distributionManagement`.
 - `scripts/render-branch-pom.py` regenerates the branch-specific `pom.xml` (JDK / dependency stack per version line).
 
 <a id="10-versioning--branches"></a>
