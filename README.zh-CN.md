@@ -4,12 +4,12 @@
 
 [![Java](https://img.shields.io/badge/Java-17-orange)](https://github.com/easy-4-java/okhttp3-extension) [![License](https://img.shields.io/badge/license-Apache%202.0-green)](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-纯 Java OkHttp 3/4 扩展层：SSL 工具、CookieJar、拦截器与响应工具类
+纯 Java OkHttp 扩展层：SSL 工具、CookieJar、拦截器与响应工具类
 
 > **当前分支**：`feature/2.0.x`
-> **版本**：`2.0.x.x.20260630-SNAPSHOT`
-> **JDK 基线**：8
-> **项目状态**：维护中（1.0.x 线）。尚未发布 Maven Central；制品通过 Aliyun Maven 仓库与 GitHub Releases 分发。
+> **版本**：`2.0.x.20260630-SNAPSHOT`
+> **JDK 基线**：17
+> **项目状态**：活跃维护（2.0.x 线）。快照制品通过阿里云 Maven 仓库分发。
 
 ## 目录
 
@@ -75,15 +75,15 @@
 | Maven | 3.0+ | Enforcer 下限 |
 | OkHttp | 4.12.0 | 通过 `okhttp-bom` 引入 |
 | Jackson annotations | 2.17.2 | 通过 `jackson-bom` 引入 |
-| Caffeine | 2.9.3 | Cookie 缓存 |
+| Caffeine | 3.2.4 | Cookie 缓存 |
 | SLF4J | 2.0.18 | 日志门面 |
 
 版本线矩阵：
 
 | 版本线 | 分支 | JDK | 版本模式 | 用途 |
 |---|---|---:|---|---|
-| 1.0.x | `feature/2.0.x`（当前分支） | 8 | `1.0.x.*` | 供 Boot 2.x Starter 与存量项目使用 |
-| 2.0.x | `feature/2.0.x` | 17 | `2.0.x.*` | 供 Boot 3.x Starter 使用 |
+| 1.0.x | `feature/1.0.x` | 8 | `1.0.x.*` | 供 Boot 2.x Starter 与存量项目使用 |
+| 2.0.x | `feature/2.0.x`（当前分支） | 17 | `2.0.x.*` | 供 Boot 3.x Starter 使用 |
 | 3.0.x | `feature/3.0.x` | 21 | `3.0.x.*` | 供 Boot 4.x Starter / 新项目使用 |
 
 <a id="4-architecture--modules"></a>
@@ -128,14 +128,14 @@ Maven：
 <dependency>
     <groupId>io.github.easy4j</groupId>
     <artifactId>okhttp3-extension</artifactId>
-    <version>2.0.x.x.20260630-SNAPSHOT</version>
+    <version>2.0.x.20260630-SNAPSHOT</version>
 </dependency>
 ```
 
 Gradle：
 
 ```groovy
-implementation 'io.github.easy4j:okhttp3-extension:2.0.x.x.20260630-SNAPSHOT'
+implementation 'io.github.easy4j:okhttp3-extension:2.0.x.20260630-SNAPSHOT'
 ```
 
 快照版本需要启用对应快照仓库（`pom.xml` 中 `distributionManagement` 指向 Aliyun Maven 仓库）。
@@ -219,10 +219,10 @@ CookieJar jar = new PersistenceCookieJar() {
 mvn clean verify
 ```
 
-- 父 POM 通过 `maven-enforcer-plugin` 强制 Maven 与 JDK 8 基线。
+- POM 通过 `maven-enforcer-plugin` 强制 Maven 与 JDK 17 基线。
 - Surefire 配置为运行 `**/*Tests.java`，并排除 `**/TestBean.java` 辅助类。
-- JaCoCo 在 `verify` 阶段执行 `prepare-agent`、`report` 与 `check`，行覆盖率规则为 **90%**（`haltOnFailure=false`）。
-- 发布打包（`mvn -Prelease deploy`）附带 sources 与 javadoc 构件并执行 GPG 签名，对接 Sonatype Central Publishing；普通 `mvn deploy` 按版本后缀路由到 Aliyun Maven 仓库（见 `distributionManagement`）。
+- JaCoCo 在 `verify` 阶段执行 `prepare-agent`、`report` 与 `check`，行覆盖率规则为 **90%**（`haltOnFailure=true`）。
+- `mvn clean deploy -Prelease` 会附带 sources 与 javadoc 构件、执行 GPG 签名，并把 SNAPSHOT 制品发布到 `distributionManagement` 声明的阿里云 Maven 仓库。
 - `scripts/render-branch-pom.py` 按版本线重新生成分支专属 `pom.xml`（JDK 与依赖栈随线变化）。
 
 <a id="10-versioning--branches"></a>
@@ -230,8 +230,8 @@ mvn clean verify
 
 | 分支 | 版本模式 | JDK | 维护策略 |
 |---|---|---|---|
-| `feature/1.0.x`（当前分支） | `1.0.x.*` | 8 | 仅接受兼容性修复与 JDK 8 安全的依赖升级 |
-| `feature/2.0.x` | `2.0.x.*` | 17 | JDK 17 线 |
+| `feature/1.0.x` | `1.0.x.*` | 8 | 仅接受兼容性修复与 JDK 8 安全的依赖升级 |
+| `feature/2.0.x`（当前分支） | `2.0.x.*` | 17 | JDK 17 线 |
 | `feature/3.0.x` | `3.0.x.*` | 21 | JDK 21 线 |
 
 各版本线按分支独立维护；依赖栈与 JDK 基线随线变化，由 `scripts/render-branch-pom.py` 渲染进分支 POM。

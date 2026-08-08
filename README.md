@@ -4,13 +4,13 @@
 
 [![Java](https://img.shields.io/badge/Java-17-orange)](https://github.com/easy-4-java/okhttp3-extension) [![License](https://img.shields.io/badge/license-Apache%202.0-green)](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-Pure Java extension layer for OkHttp 3/4: SSL utilities, CookieJars, interceptors, response helpers
+Pure Java extension layer for OkHttp: SSL utilities, CookieJars, interceptors, response helpers
 [简体中文](./README.zh-CN.md)
 
 > **Current branch**: `feature/2.0.x`
-> **Version**: `2.0.x.x.20260630-SNAPSHOT`
-> **JDK baseline**: 8
-> **Project status**: maintenance (1.0.x line). Not yet published to Maven Central; artifacts are distributed via the Aliyun Maven repository and GitHub Releases.
+> **Version**: `2.0.x.20260630-SNAPSHOT`
+> **JDK baseline**: 17
+> **Project status**: active (2.0.x line). Snapshot artifacts are distributed through the Aliyun Maven repository.
 
 ## Table of Contents
 
@@ -76,15 +76,15 @@ Pure Java extension layer for OkHttp 3/4: SSL utilities, CookieJars, interceptor
 | Maven | 3.0+ | Enforcer minimum |
 | OkHttp | 4.12.0 | Via `okhttp-bom` |
 | Jackson annotations | 2.17.2 | Via `jackson-bom` |
-| Caffeine | 2.9.3 | Cookie cache |
+| Caffeine | 3.2.4 | Cookie cache |
 | SLF4J | 2.0.18 | Logging facade |
 
 Version-line matrix:
 
 | Version line | Branch | JDK | Version pattern | Purpose |
 |---|---|---:|---|---|
-| 1.0.x | `feature/2.0.x` (this branch) | 8 | `1.0.x.*` | For Boot 2.x starters and legacy projects |
-| 2.0.x | `feature/2.0.x` | 17 | `2.0.x.*` | For Boot 3.x starters |
+| 1.0.x | `feature/1.0.x` | 8 | `1.0.x.*` | For Boot 2.x starters and legacy projects |
+| 2.0.x | `feature/2.0.x` (this branch) | 17 | `2.0.x.*` | For Boot 3.x starters |
 | 3.0.x | `feature/3.0.x` | 21 | `3.0.x.*` | For Boot 4.x starters / new projects |
 
 <a id="4-architecture--modules"></a>
@@ -129,14 +129,14 @@ Maven:
 <dependency>
     <groupId>io.github.easy4j</groupId>
     <artifactId>okhttp3-extension</artifactId>
-    <version>2.0.x.x.20260630-SNAPSHOT</version>
+    <version>2.0.x.20260630-SNAPSHOT</version>
 </dependency>
 ```
 
 Gradle:
 
 ```groovy
-implementation 'io.github.easy4j:okhttp3-extension:2.0.x.x.20260630-SNAPSHOT'
+implementation 'io.github.easy4j:okhttp3-extension:2.0.x.20260630-SNAPSHOT'
 ```
 
 Snapshot builds require an enabled snapshot repository (Aliyun Maven snapshot repository per `distributionManagement` in `pom.xml`).
@@ -220,10 +220,10 @@ CookieJar jar = new PersistenceCookieJar() {
 mvn clean verify
 ```
 
-- The parent POM enforces Maven and JDK 8 baselines via `maven-enforcer-plugin`.
+- The POM enforces the Maven and JDK 17 baselines via `maven-enforcer-plugin`.
 - Surefire is configured to run `**/*Tests.java` classes and to exclude `**/TestBean.java` helpers.
-- JaCoCo runs `prepare-agent`, `report` and `check` on the `verify` phase with a **90% line-coverage** rule (`haltOnFailure=false`).
-- Release packaging (`mvn -Prelease deploy`) attaches sources and javadoc jars, GPG-signs artifacts and is wired for Sonatype Central Publishing; plain `mvn deploy` routes SNAPSHOT/release artifacts to the Aliyun Maven repository per `distributionManagement`.
+- JaCoCo runs `prepare-agent`, `report` and `check` on the `verify` phase with a **90% line-coverage** rule (`haltOnFailure=true`).
+- `mvn clean deploy -Prelease` attaches sources and javadoc jars, signs them with GPG, and deploys SNAPSHOT artifacts to the Aliyun Maven repository declared by `distributionManagement`.
 - `scripts/render-branch-pom.py` regenerates the branch-specific `pom.xml` (JDK / dependency stack per version line).
 
 <a id="10-versioning--branches"></a>
@@ -231,8 +231,8 @@ mvn clean verify
 
 | Branch | Version pattern | JDK | Maintenance policy |
 |---|---|---|---|
-| `feature/1.0.x` (this branch) | `1.0.x.*` | 8 | Compatibility fixes and JDK-8-safe dependency upgrades only |
-| `feature/2.0.x` | `2.0.x.*` | 17 | JDK 17 line |
+| `feature/1.0.x` | `1.0.x.*` | 8 | Compatibility fixes and JDK-8-safe dependency upgrades only |
+| `feature/2.0.x` (this branch) | `2.0.x.*` | 17 | JDK 17 line |
 | `feature/3.0.x` | `3.0.x.*` | 21 | JDK 21 line |
 
 Each line is maintained per branch; dependency stacks and JDK baselines differ per line and are rendered into the branch POM by `scripts/render-branch-pom.py`.
