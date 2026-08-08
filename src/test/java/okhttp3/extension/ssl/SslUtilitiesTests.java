@@ -113,6 +113,12 @@ class SslUtilitiesTests {
         assertNotNull(SSLContexts.custom());
         assertThrows(IOException.class, () -> SSLContexts.createSSLContext("not-a-protocol",
                 (javax.net.ssl.KeyManager) null, (javax.net.ssl.TrustManager) null));
+        assertThrows(IOException.class, () -> SSLContexts.createSSLContext("not-a-protocol",
+                (javax.net.ssl.KeyManager[]) null,
+                (javax.net.ssl.TrustManager[]) null,
+                new SecureRandom()));
+        assertThrows(IOException.class, () -> SSLContexts.createSSLContext(
+                "not-a-protocol", file, "changeit", (chain, authType) -> true));
         assertThrows(java.security.KeyStoreException.class,
                 () -> KeyManagerUtils.createClientKeyManager(file, "changeit", null));
         assertThrows(java.security.KeyStoreException.class,
