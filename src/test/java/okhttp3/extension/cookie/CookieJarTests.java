@@ -7,10 +7,7 @@ import okhttp3.extension.cache.PersistenceCookieJar;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -30,20 +27,18 @@ class CookieJarTests {
     void caffeineJarShouldMergeResponsesAndRespectCookiePath() {
         CaffeineCacheCookieJar jar = new CaffeineCacheCookieJar(
                 100, Duration.ofHours(1), Duration.ofHours(1));
-        jar.saveFromResponse(API_URL, Collections.singletonList(cookie("root", "1", "/")));
-        jar.saveFromResponse(API_URL, Collections.singletonList(cookie("api", "2", "/api")));
+        jar.saveFromResponse(API_URL, List.of(cookie("root", "1", "/")));
+        jar.saveFromResponse(API_URL, List.of(cookie("api", "2", "/api")));
 
         assertEquals(2, jar.loadForRequest(API_URL).size());
-        assertEquals(Collections.singletonList("root"), jar.loadForRequest(OTHER_URL).stream()
-                .map(Cookie::name)
-                .collect(Collectors.toList()));
+        assertEquals(List.of("root"), jar.loadForRequest(OTHER_URL).stream().map(Cookie::name).toList());
     }
 
     @Test
     void persistenceJarShouldReplaceCookieWithSameIdentity() {
         PersistenceCookieJar jar = new PersistenceCookieJar();
-        jar.saveFromResponse(API_URL, Collections.singletonList(cookie("session", "old", "/")));
-        jar.saveFromResponse(API_URL, Collections.singletonList(cookie("session", "new", "/")));
+        jar.saveFromResponse(API_URL, List.of(cookie("session", "old", "/")));
+        jar.saveFromResponse(API_URL, List.of(cookie("session", "new", "/")));
 
         List<Cookie> cookies = jar.loadForRequest(API_URL);
         assertEquals(1, cookies.size());
@@ -56,10 +51,10 @@ class CookieJarTests {
                 100, Duration.ofHours(1), Duration.ofHours(1));
         CaffeineCacheCookieJar scoped = new CaffeineCacheCookieJar(
                 100, Duration.ofHours(1), Duration.ofHours(1));
-        root.saveFromResponse(API_URL, Collections.singletonList(cookie("session", "root", "/")));
-        scoped.saveFromResponse(API_URL, Collections.singletonList(cookie("session", "api", "/api")));
+        root.saveFromResponse(API_URL, List.of(cookie("session", "root", "/")));
+        scoped.saveFromResponse(API_URL, List.of(cookie("session", "api", "/api")));
 
-        NestedCookieJar jar = new NestedCookieJar(Arrays.asList(root, scoped));
+        NestedCookieJar jar = new NestedCookieJar(List.of(root, scoped));
         assertEquals(2, jar.loadForRequest(API_URL).size());
     }
 
@@ -71,19 +66,18 @@ class CookieJarTests {
         Cookie root = cookie("session", "root", "/");
         Cookie replacement = cookie("session", "replacement", "/");
         Cookie mismatched = cookie("other", "value", "/other");
-        doThrow(new IllegalStateException("save failed")).when(failing)
-                .saveFromResponse(API_URL, Collections.singletonList(root));
+        doThrow(new IllegalStateException("save failed")).when(failing).saveFromResponse(API_URL, List.of(root));
         when(failing.loadForRequest(API_URL)).thenThrow(new IllegalStateException("load failed"));
         when(empty.loadForRequest(API_URL)).thenReturn(null);
-        when(values.loadForRequest(API_URL)).thenReturn(Arrays.asList(root, replacement, mismatched));
+        when(values.loadForRequest(API_URL)).thenReturn(List.of(root, replacement, mismatched));
 
-        NestedCookieJar jar = new NestedCookieJar(Arrays.asList(failing, empty, values));
-        jar.saveFromResponse(API_URL, Collections.singletonList(root));
+        NestedCookieJar jar = new NestedCookieJar(List.of(failing, empty, values));
+        jar.saveFromResponse(API_URL, List.of(root));
         List<Cookie> loaded = jar.loadForRequest(API_URL);
         assertEquals(1, loaded.size());
         assertEquals("replacement", loaded.get(0).value());
         assertTrue(new NestedCookieJar(null).loadForRequest(API_URL).isEmpty());
-        new NestedCookieJar(null).saveFromResponse(API_URL, Collections.singletonList(root));
+        new NestedCookieJar(null).saveFromResponse(API_URL, List.of(root));
     }
 
     private static Cookie cookie(String name, String value, String path) {

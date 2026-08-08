@@ -17,7 +17,6 @@ package okhttp3.extension.cache;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -63,43 +62,12 @@ public class PersistenceCookieJar implements CookieJar {
                 validCookies.add(cookie);
             }
         });
-        return validCookies.isEmpty()
-                ? Collections.emptyList()
-                : Collections.unmodifiableList(new java.util.ArrayList<>(validCookies));
+        return validCookies.isEmpty() ? Collections.emptyList() : List.copyOf(validCookies);
     }
 
-    private static final class CookieKey {
-        private final String name;
-        private final String domain;
-        private final String path;
-
-        private CookieKey(String name, String domain, String path) {
-            this.name = name;
-            this.domain = domain;
-            this.path = path;
-        }
-
+    private record CookieKey(String name, String domain, String path) {
         private static CookieKey from(Cookie cookie) {
             return new CookieKey(cookie.name(), cookie.domain(), cookie.path());
-        }
-
-        @Override
-        public boolean equals(Object object) {
-            if (this == object) {
-                return true;
-            }
-            if (!(object instanceof CookieKey)) {
-                return false;
-            }
-            CookieKey cookieKey = (CookieKey) object;
-            return Objects.equals(name, cookieKey.name)
-                    && Objects.equals(domain, cookieKey.domain)
-                    && Objects.equals(path, cookieKey.path);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(name, domain, path);
         }
     }
 }

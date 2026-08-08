@@ -7,8 +7,6 @@ import okhttp3.Response;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -18,10 +16,8 @@ import java.util.Set;
 public class RequestRetryIntercepter implements RequestInterceptor {
 
     private static final long MAX_RETRY_INTERVAL_MILLIS = 30_000L;
-    private static final Set<String> IDEMPOTENT_METHODS = new HashSet<>(
-            Arrays.asList("GET", "HEAD", "OPTIONS", "TRACE"));
-    private static final Set<Integer> RETRYABLE_STATUS_CODES = new HashSet<>(
-            Arrays.asList(408, 425, 429, 500, 502, 503, 504));
+    private static final Set<String> IDEMPOTENT_METHODS = Set.of("GET", "HEAD", "OPTIONS", "TRACE");
+    private static final Set<Integer> RETRYABLE_STATUS_CODES = Set.of(408, 425, 429, 500, 502, 503, 504);
 
     private final int retryMaxAttempts;
     private final long retryInterval;
@@ -81,7 +77,7 @@ public class RequestRetryIntercepter implements RequestInterceptor {
             return true;
         }
         String idempotencyKey = request.header("Idempotency-Key");
-        if (idempotencyKey == null || idempotencyKey.trim().isEmpty()) {
+        if (idempotencyKey == null || idempotencyKey.isBlank()) {
             return false;
         }
         RequestBody body = request.body();

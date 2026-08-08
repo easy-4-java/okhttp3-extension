@@ -56,9 +56,7 @@ class RequestInterceptorTests {
 
     @Test
     void shouldCompressEligibleBodiesAndSkipIneligibleBodies() throws Exception {
-        char[] content = new char[2_048];
-        java.util.Arrays.fill(content, 'x');
-        String large = new String(content);
+        String large = "x".repeat(2_048);
         Request request = new Request.Builder().url("http://localhost")
                 .post(RequestBody.create(large, MediaType.get("text/plain"))).build();
         GzipRequestInterceptor interceptor = new GzipRequestInterceptor(true, 100);
@@ -138,5 +136,35 @@ class RequestInterceptorTests {
         @Override public Interceptor.Chain withReadTimeout(int timeout, java.util.concurrent.TimeUnit unit) { return this; }
         @Override public int writeTimeoutMillis() { return 0; }
         @Override public Interceptor.Chain withWriteTimeout(int timeout, java.util.concurrent.TimeUnit unit) { return this; }
+        @Override public boolean getFollowSslRedirects() { return true; }
+        @Override public boolean getFollowRedirects() { return true; }
+        @Override public okhttp3.Dns getDns() { return okhttp3.Dns.SYSTEM; }
+        @Override public Interceptor.Chain withDns(okhttp3.Dns dns) { return this; }
+        @Override public javax.net.SocketFactory getSocketFactory() { return javax.net.SocketFactory.getDefault(); }
+        @Override public Interceptor.Chain withSocketFactory(javax.net.SocketFactory factory) { return this; }
+        @Override public boolean getRetryOnConnectionFailure() { return true; }
+        @Override public Interceptor.Chain withRetryOnConnectionFailure(boolean value) { return this; }
+        @Override public okhttp3.Authenticator getAuthenticator() { return okhttp3.Authenticator.NONE; }
+        @Override public Interceptor.Chain withAuthenticator(okhttp3.Authenticator authenticator) { return this; }
+        @Override public okhttp3.CookieJar getCookieJar() { return okhttp3.CookieJar.NO_COOKIES; }
+        @Override public Interceptor.Chain withCookieJar(okhttp3.CookieJar cookieJar) { return this; }
+        @Override public okhttp3.Cache getCache() { return null; }
+        @Override public Interceptor.Chain withCache(okhttp3.Cache cache) { return this; }
+        @Override public java.net.Proxy getProxy() { return null; }
+        @Override public Interceptor.Chain withProxy(java.net.Proxy proxy) { return this; }
+        @Override public java.net.ProxySelector getProxySelector() { return java.net.ProxySelector.getDefault(); }
+        @Override public Interceptor.Chain withProxySelector(java.net.ProxySelector selector) { return this; }
+        @Override public okhttp3.Authenticator getProxyAuthenticator() { return okhttp3.Authenticator.NONE; }
+        @Override public Interceptor.Chain withProxyAuthenticator(okhttp3.Authenticator authenticator) { return this; }
+        @Override public javax.net.ssl.SSLSocketFactory getSslSocketFactoryOrNull() { return null; }
+        @Override public Interceptor.Chain withSslSocketFactory(javax.net.ssl.SSLSocketFactory factory, javax.net.ssl.X509TrustManager manager) { return this; }
+        @Override public javax.net.ssl.X509TrustManager getX509TrustManagerOrNull() { return null; }
+        @Override public javax.net.ssl.HostnameVerifier getHostnameVerifier() { return (h, s) -> true; }
+        @Override public Interceptor.Chain withHostnameVerifier(javax.net.ssl.HostnameVerifier verifier) { return this; }
+        @Override public okhttp3.CertificatePinner getCertificatePinner() { return okhttp3.CertificatePinner.DEFAULT; }
+        @Override public Interceptor.Chain withCertificatePinner(okhttp3.CertificatePinner pinner) { return this; }
+        @Override public okhttp3.ConnectionPool getConnectionPool() { return new okhttp3.ConnectionPool(); }
+        @Override public Interceptor.Chain withConnectionPool(okhttp3.ConnectionPool pool) { return this; }
+        @Override public okhttp3.EventListener getEventListener() { return okhttp3.EventListener.NONE; }
     }
 }
