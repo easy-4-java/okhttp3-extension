@@ -26,7 +26,7 @@ import okhttp3.HttpUrl;
 
 /**
  *  持久化Cookie，运行时缓存了Cookie，当App退出的时候Cookie就不存在了
- * @author [@Loong Wan](https://github.com/loong10k)
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
  */
 public class PersistenceCookieJar implements CookieJar {
     
