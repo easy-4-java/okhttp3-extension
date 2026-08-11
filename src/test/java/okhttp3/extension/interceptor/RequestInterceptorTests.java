@@ -56,7 +56,7 @@ class RequestInterceptorTests {
 
     @Test
     void shouldCompressEligibleBodiesAndSkipIneligibleBodies() throws Exception {
-        String large = "x".repeat(2_048);
+        String large = new String(new char[2_048]).replace('\0', 'x');
         Request request = new Request.Builder().url("http://localhost")
                 .post(RequestBody.create(large, MediaType.get("text/plain"))).build();
         GzipRequestInterceptor interceptor = new GzipRequestInterceptor(true, 100);
