@@ -50,9 +50,9 @@ class SslUtilitiesTests {
         assertThrows(IllegalArgumentException.class, () -> Args.check(false, "bad %s", "value"));
         assertThrows(IllegalArgumentException.class, () -> Args.notNull(null, "value"));
         assertSame("x", Args.notNull("x", "value"));
-        assertEquals(List.of("x"), Args.notEmpty(List.of("x"), "items"));
+        assertEquals(Collections.singletonList("x"), Args.notEmpty(Collections.singletonList("x"), "items"));
         assertThrows(IllegalArgumentException.class, () -> Args.notEmpty(null, "items"));
-        assertThrows(IllegalArgumentException.class, () -> Args.notEmpty(List.of(), "items"));
+        assertThrows(IllegalArgumentException.class, () -> Args.notEmpty(Collections.emptyList(), "items"));
         assertEquals(1, Args.positive(1, "n"));
         assertEquals(1L, Args.positive(1L, "n"));
         assertThrows(IllegalArgumentException.class, () -> Args.positive(0, "n"));
@@ -201,7 +201,7 @@ class SslUtilitiesTests {
         KeyStore keyStore = mock(KeyStore.class);
         PrivateKey privateKey = mock(PrivateKey.class);
         X509Certificate certificate = mock(X509Certificate.class);
-        when(keyStore.aliases()).thenReturn(Collections.enumeration(List.of("client")));
+        when(keyStore.aliases()).thenReturn(Collections.enumeration(Collections.singletonList("client")));
         when(keyStore.isKeyEntry("client")).thenReturn(true);
         when(keyStore.getKey("client", "secret".toCharArray())).thenReturn(privateKey);
         when(keyStore.getCertificateChain("client")).thenReturn(new Certificate[]{certificate});
