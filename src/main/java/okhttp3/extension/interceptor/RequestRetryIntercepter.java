@@ -21,8 +21,11 @@ public class RequestRetryIntercepter implements RequestInterceptor {
     private static final long MAX_RETRY_INTERVAL_MILLIS = 30_000L;
     private static final Set<String> IDEMPOTENT_METHODS = Collections.unmodifiableSet(
             new HashSet<>(Arrays.asList("GET", "HEAD", "OPTIONS", "TRACE")));
+    // Transient / retryable status codes. HTTP 500 (Internal Server Error) is intentionally
+    // excluded because it signals a server-side bug rather than a transient failure; retrying
+    // amplifies load on the failing server and may cause duplicate side effects.
     private static final Set<Integer> RETRYABLE_STATUS_CODES = Collections.unmodifiableSet(
-            new HashSet<>(Arrays.asList(408, 425, 429, 500, 502, 503, 504)));
+            new HashSet<>(Arrays.asList(408, 425, 429, 502, 503, 504)));
 
     private final int retryMaxAttempts;
     private final long retryInterval;
