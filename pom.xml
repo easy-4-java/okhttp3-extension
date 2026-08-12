@@ -93,7 +93,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
-                <version>2.21.5</version>
+                <version>2.22.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -134,11 +134,13 @@
                 <groupId>com.squareup.okhttp3</groupId>
                 <artifactId>okhttp-jvm</artifactId>
             <version>${okhttp.version}</version></dependency>
-            <!-- For Jackson -->
+            <!-- For Jackson: pinned explicitly so the artifact version is unambiguous and decoupled
+                 from any transitive BOM-import quirks. Keep this in sync with jackson-bom above. -->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-            <version>2.22</version></dependency>
+                <version>2.22</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

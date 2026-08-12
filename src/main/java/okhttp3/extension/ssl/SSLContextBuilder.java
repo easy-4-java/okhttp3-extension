@@ -76,7 +76,12 @@ import javax.net.ssl.X509TrustManager;
  */
 public class SSLContextBuilder {
 
-    static final String TLS   = "TLS";
+    /**
+     * Default SSLContext protocol. Pinned to {@code TLSv1.2} to avoid JDK implementations
+     * negotiating older / insecure protocol versions (TLSv1.0 and TLSv1.1). Callers who
+     * need TLSv1.3 should explicitly invoke {@link #setProtocol(String)}.
+     */
+    static final String TLS   = "TLSv1.2";
 
     private String protocol;
     private final Set<KeyManager> keyManagers;

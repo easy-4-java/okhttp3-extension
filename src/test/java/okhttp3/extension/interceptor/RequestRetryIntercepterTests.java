@@ -149,6 +149,54 @@ class RequestRetryIntercepterTests {
         }
     }
 
+    /**
+     * HTTP 500 represents a server-side bug; retrying amplifies load on an already-failing
+     * service and may produce duplicate side effects, so it must not be in the default
+     * retryable set. Transient codes (503/504/429/502/408/425) remain retryable.
+     */
+    @Test
+    void shouldNotRetryInternalServerErrorButStillRetryTransientCodes() throws Exception {
+        for (int code : new int[]{500}) {
+            AtomicInteger requestCount = new AtomicInteger();
+            server = startServer(exchange -> {
+                requestCount.incrementAndGet();
+                respond(exchange, code, "oops");
+            });
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .addInterceptor(new RequestRetryIntercepter(3, 0L))
+                    .build();
+            Request request = new Request.Builder().url(baseUrl()).get().build();
+            try (Response response = client.newCall(request).execute()) {
+                assertEquals(code, response.code());
+            } finally {
+                shutdown(client);
+            }
+            assertEquals(1, requestCount.get(), "status " + code + " must not be retried");
+        }
+    }
+
+    @Test
+    void shouldStillRetryServiceUnavailableGatewayTimeoutAndTooManyRequests() throws Exception {
+        int[] transientCodes = {408, 425, 429, 502, 503, 504};
+        for (int code : transientCodes) {
+            AtomicInteger requestCount = new AtomicInteger();
+            server = startServer(exchange -> {
+                int count = requestCount.incrementAndGet();
+                respond(exchange, count == 1 ? code : 200, count == 1 ? "x" : "ok");
+            });
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .addInterceptor(new RequestRetryIntercepter(2, 0L))
+                    .build();
+            Request request = new Request.Builder().url(baseUrl()).get().build();
+            try (Response response = client.newCall(request).execute()) {
+                assertEquals(200, response.code());
+            } finally {
+                shutdown(client);
+            }
+            assertEquals(2, requestCount.get(), "status " + code + " must be retried");
+        }
+    }
+
     private static Response response(Request request, int code) {
         return new Response.Builder().request(request).protocol(okhttp3.Protocol.HTTP_1_1)
                 .code(code).message("status").body(okhttp3.ResponseBody.create("body", null)).build();

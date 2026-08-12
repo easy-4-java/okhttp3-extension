@@ -34,10 +34,20 @@ public final class SafeHttpLoggingInterceptor implements Interceptor {
 
     private static final Charset UTF_8 = StandardCharsets.UTF_8;
     private static final String REDACTED = "<redacted>";
+    // Same value as above, but using only "unreserved" URI characters so OkHttp's
+    // HttpUrl.toString() does not percent-encode it. Used for URL query parameter replacement
+    // to avoid noisy %3Credacted%3E strings in log output.
+    private static final String REDACTED_URL_SAFE = "__okhttp3_redacted__";
     private static final AtomicLong REQUEST_SEQUENCE = new AtomicLong();
     private static final Set<String> DEFAULT_REDACTED_HEADERS = new HashSet<>(Arrays.asList(
             "authorization", "proxy-authorization", "cookie", "set-cookie", "x-api-key", "api-key",
             "x-auth-token", "x-openclaw-token"));
+
+    // Sensitive URL query parameter names whose values are redacted when the request URL is
+    // logged. Matching is case-insensitive and applies to all log levels.
+    private static final Set<String> REDACTED_QUERY_PARAMS = new HashSet<>(Arrays.asList(
+            "access_token", "apikey", "api_key", "client_secret", "code", "id_token",
+            "password", "secret", "signature", "token", "x-api-key"));
 
     private final Logger logger;
     private final HttpLogLevel level;
@@ -59,6 +69,19 @@ public final class SafeHttpLoggingInterceptor implements Interceptor {
         this.logger = logger;
         this.level = level == null ? HttpLogLevel.NONE : level;
         this.maxContentLength = Math.max(1, maxContentLength);
+    }
+
+    /**
+     * 增加需要脱敏的 URL 查询参数名称，名称匹配不区分大小写。
+     *
+     * @param queryParamName 查询参数名称
+     * @return 当前拦截器
+     */
+    public SafeHttpLoggingInterceptor redactQueryParam(String queryParamName) {
+        if (queryParamName != null && !queryParamName.trim().isEmpty()) {
+            REDACTED_QUERY_PARAMS.add(queryParamName.trim().toLowerCase(Locale.ROOT));
+        }
+        return this;
     }
 
     /**
@@ -91,7 +114,7 @@ public final class SafeHttpLoggingInterceptor implements Interceptor {
         long startedAt = System.nanoTime();
         Request request = chain.request();
         logger.debug("HTTP request started: requestId={}, method={}, url={}",
-                requestId, request.method(), request.url());
+                requestId, request.method(), redactQueryParams(request.url()));
         if (level.allows(HttpLogLevel.HEADERS)) {
             logger.debug("HTTP request headers: requestId={}, headers={}", requestId, formatHeaders(request.headers()));
         }
@@ -104,7 +127,7 @@ public final class SafeHttpLoggingInterceptor implements Interceptor {
             ResponseBody responseBody = response.body();
             long bodyLength = responseBody == null ? 0L : responseBody.contentLength();
             logger.debug("HTTP request completed: requestId={}, method={}, url={}, status={}, bodyLength={}, elapsedMs={}",
-                    requestId, request.method(), request.url(), response.code(), bodyLength, elapsedMillis(startedAt));
+                    requestId, request.method(), redactQueryParams(request.url()), response.code(), bodyLength, elapsedMillis(startedAt));
             if (level.allows(HttpLogLevel.HEADERS)) {
                 logger.debug("HTTP response headers: requestId={}, headers={}",
                         requestId, formatHeaders(response.headers()));
@@ -115,7 +138,7 @@ public final class SafeHttpLoggingInterceptor implements Interceptor {
             return response;
         } catch (IOException error) {
             logger.debug("HTTP request failed: requestId={}, method={}, url={}, elapsedMs={}, error={}",
-                    requestId, request.method(), request.url(), elapsedMillis(startedAt), error.getMessage());
+                    requestId, request.method(), redactQueryParams(request.url()), elapsedMillis(startedAt), error.getMessage());
             throw error;
         }
     }
@@ -143,9 +166,22 @@ public final class SafeHttpLoggingInterceptor implements Interceptor {
         if (!isText(body.contentType())) {
             return "<binary body omitted>";
         }
+        long cap = Math.max(1L, (long) maxContentLength * 4L);
+        long declared;
+        try {
+            declared = body.contentLength();
+        } catch (IOException error) {
+            return "<body unavailable: " + error.getMessage() + ">";
+        }
+        if (declared > 0L && declared > cap) {
+            return "<request body omitted: " + declared + " bytes exceeds limit " + cap + ">";
+        }
         try {
             Buffer buffer = new Buffer();
             body.writeTo(buffer);
+            if (buffer.size() > cap) {
+                return "<request body omitted: " + buffer.size() + " bytes exceeds limit " + cap + ">";
+            }
             return truncate(buffer.readString(resolveCharset(body.contentType())));
         } catch (IOException error) {
             return "<body unavailable: " + error.getMessage() + ">";
@@ -190,6 +226,29 @@ public final class SafeHttpLoggingInterceptor implements Interceptor {
             return content;
         }
         return content.substring(0, maxContentLength) + "...<truncated>";
+    }
+
+    /**
+     * Returns the URL as a string but with values of configured sensitive query parameters
+     * replaced by {@code <redacted>}. Names match case-insensitively against
+     * {@link #REDACTED_QUERY_PARAMS}, which can be extended via {@link #redactQueryParam(String)}.
+     */
+    static String redactQueryParams(okhttp3.HttpUrl url) {
+        if (url == null) {
+            return null;
+        }
+        int querySize = url.querySize();
+        if (querySize == 0) {
+            return url.toString();
+        }
+        okhttp3.HttpUrl.Builder rebuilt = url.newBuilder();
+        for (int i = 0; i < querySize; i++) {
+            String name = url.queryParameterName(i);
+            if (name != null && REDACTED_QUERY_PARAMS.contains(name.toLowerCase(Locale.ROOT))) {
+                rebuilt.setQueryParameter(name, REDACTED_URL_SAFE);
+            }
+        }
+        return rebuilt.build().toString();
     }
 
     private long elapsedMillis(long startedAt) {

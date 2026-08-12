@@ -12,12 +12,16 @@ import javax.net.ssl.X509TrustManager;
 
 /*
  * TrustManager utilities for generating TrustManagers.
- * 
+ *
  * @since 3.0
  */
 public final class TrustManagerUtils {
 
 	private static final X509Certificate[] EMPTY_X509CERTIFICATE_ARRAY = new X509Certificate[] {};
+
+	// Tracks whether the deprecated trust-all entry points have been invoked at least once,
+	// so we can emit a single runtime warning per process without flooding the logs.
+	private static volatile boolean trustAllWarned;
 
 	// 用于解决javax.net.ssl.SSLPeerUnverifiedException: peer not authenticated
 	private static class TrustManager implements X509TrustManager {
@@ -68,20 +72,54 @@ public final class TrustManagerUtils {
 	
 	/*
 	 * Generate a HostnameVerifier that performs no checks.
+	 * <p>
+	 * <b>Security warning:</b> this verifier bypasses hostname verification entirely and
+	 * must never be used in production. It is provided only for local development and
+	 * testing against self-signed certificates. The first invocation in a JVM lifetime emits
+	 * a {@code WARNING} log line via {@code java.util.logging}.
 	 *
 	 * @return the HostnameVerifier
+	 * @deprecated use a real {@code HostnameVerifier} (e.g. the JVM default) outside of
+	 *             development scenarios. Scheduled for removal in a future major release.
 	 */
+	@Deprecated
 	public static HostnameVerifier getAcceptAllHostnameVerifier() {
+		warnTrustAll("getAcceptAllHostnameVerifier");
 		return ACCEPT_ALL_VERIFIER;
 	}
-	
+
 	/*
 	 * Generate a TrustManager that performs no checks.
+	 * <p>
+	 * <b>Security warning:</b> this trust manager trusts any certificate chain, making the
+	 * underlying connection vulnerable to man-in-the-middle attacks. It must never be used in
+	 * production. The first invocation in a JVM lifetime emits a {@code WARNING} log line
+	 * via {@code java.util.logging}.
 	 *
 	 * @return the TrustManager
+	 * @deprecated load a real trust material via {@link SSLContextBuilder#loadTrustMaterial(KeyStore, TrustStrategy)}
+	 *             or the JVM default {@link #getDefaultTrustManager(KeyStore)}. Scheduled
+	 *             for removal in a future major release.
 	 */
+	@Deprecated
 	public static X509TrustManager getAcceptAllTrustManager() {
+		warnTrustAll("getAcceptAllTrustManager");
 		return ACCEPT_ALL;
+	}
+
+	private static void warnTrustAll(String entryPoint) {
+		if (trustAllWarned) {
+			return;
+		}
+		synchronized (TrustManagerUtils.class) {
+			if (trustAllWarned) {
+				return;
+			}
+			trustAllWarned = true;
+			java.util.logging.Logger.getLogger(TrustManagerUtils.class.getName())
+					.warning("[okhttp3-extension] " + entryPoint + "() disables TLS verification. "
+							+ "Do NOT use in production.");
+		}
 	}
 
 	/*
