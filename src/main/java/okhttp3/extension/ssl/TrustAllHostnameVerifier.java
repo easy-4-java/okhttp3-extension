@@ -17,8 +17,20 @@ package okhttp3.extension.ssl;
 
 import javax.net.ssl.SSLSession;
 
+/**
+ * {@link OkHttpHostnameVerifier} that unconditionally returns {@code true}, disabling all
+ * hostname verification.
+ *
+ * <p><b>Security warning:</b> this verifier makes HTTPS connections vulnerable to
+ * man-in-the-middle attacks and must never be used in production. It is provided only for
+ * local development against self-signed certificates.</p>
+ *
+ * @deprecated use the JVM default {@code OkHostnameVerifier}. This class is scheduled for
+ *             removal in a future major release.
+ */
+@Deprecated
 public class TrustAllHostnameVerifier implements OkHttpHostnameVerifier {
-	
+
 	@Override
 	public boolean verify(String hostname, SSLSession session) {
 		return true;

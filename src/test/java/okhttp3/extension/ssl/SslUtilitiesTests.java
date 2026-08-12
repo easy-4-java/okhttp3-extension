@@ -220,4 +220,28 @@ class SslUtilitiesTests {
         assertThrows(KeyStoreException.class,
                 () -> KeyManagerUtils.createClientKeyManager(empty, null, "secret"));
     }
+
+    /**
+     * The default protocol advertised by {@link SSLContextBuilder} must pin to TLSv1.2 so
+     * that consumers do not silently negotiate TLSv1.0/TLSv1.1 on JDK 8.
+     */
+    @Test
+    void shouldDefaultToTlsV12ToAvoidDowngrade() {
+        assertEquals("TLSv1.2", SSLContextBuilder.TLS);
+    }
+
+    /**
+     * Both trust-all entry points on {@link TrustManagerUtils} and the standalone
+     * {@link TrustAllHostnameVerifier} must carry {@code @Deprecated} so that static
+     * analysis tooling flags any usage and reviewers immediately see the security warning.
+     */
+    @Test
+    void shouldMarkTrustAllApisAsDeprecated() throws NoSuchMethodException {
+        assertNotNull(TrustManagerUtils.class.getMethod("getAcceptAllTrustManager").getAnnotation(Deprecated.class),
+                "getAcceptAllTrustManager must be @Deprecated");
+        assertNotNull(TrustManagerUtils.class.getMethod("getAcceptAllHostnameVerifier").getAnnotation(Deprecated.class),
+                "getAcceptAllHostnameVerifier must be @Deprecated");
+        assertNotNull(TrustAllHostnameVerifier.class.getAnnotation(Deprecated.class),
+                "TrustAllHostnameVerifier must be @Deprecated");
+    }
 }

@@ -63,7 +63,7 @@
         <caffeine.version>3.2.4</caffeine.version>
         <checker-qual.version>4.2.1</checker-qual.version>
         <commons-lang.version>2.6</commons-lang.version>
-        <jackson.version>2.17.2</jackson.version>
+        <jackson.version>2.22.0</jackson.version>
         <junit-jupiter.version>6.1.0</junit-jupiter.version>
         <junit.version>4.13.2</junit.version>
         <lombok.version>1.18.46</lombok.version>
@@ -134,11 +134,15 @@
                 <groupId>com.squareup.okhttp3</groupId>
                 <artifactId>okhttp</artifactId>
             <version>${okhttp.version}</version></dependency>
-            <!-- For Jackson -->
+            <!-- For Jackson: pinned explicitly to a version whose artifact is resolvable
+                 on the configured Aliyun central mirror. The 2.22.0 BOM is used for any
+                 transitive Jackson modules that may be added later, while 2.22 (without the
+                 trailing .0) is the only jackson-annotations revision mirrored. -->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.version}</version></dependency>
+                <version>2.22</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
