@@ -63,7 +63,7 @@
         <caffeine.version>2.9.3</caffeine.version>
         <checker-qual.version>3.55.1</checker-qual.version>
         <commons-lang.version>2.6</commons-lang.version>
-        <jackson.version>2.18.9</jackson.version>
+        <jackson-bom.version>2.18.9</jackson-bom.version>
         <junit-jupiter.version>5.11.4</junit-jupiter.version>
         <junit.version>4.13.2</junit.version>
         <lombok.version>1.18.46</lombok.version>
@@ -93,7 +93,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
-                <version>${jackson.version}</version>
+                <version>${jackson-bom.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -134,11 +134,14 @@
                 <groupId>com.squareup.okhttp3</groupId>
                 <artifactId>okhttp</artifactId>
             <version>${okhttp.version}</version></dependency>
-            <!-- For Jackson -->
+            <!-- For Jackson: explicit version kept in lockstep with the imported jackson-bom
+                 so older Maven model validators still resolve the artifact in <dependencies>;
+                 the BOM itself remains the single source of truth for upgrades. -->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.version}</version></dependency>
+                <version>${jackson-bom.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
