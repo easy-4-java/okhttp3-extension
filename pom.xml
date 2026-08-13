@@ -63,7 +63,12 @@
         <caffeine.version>3.2.4</caffeine.version>
         <checker-qual.version>4.2.1</checker-qual.version>
         <commons-lang.version>2.6</commons-lang.version>
-        <jackson-bom.version>2.22.0</jackson-bom.version>
+        <jackson-bom.version>2.22.1</jackson-bom.version>
+        <!-- Jackson 2.20+ decoupled annotations from the patch-version line; the mirror
+                 only mirrors the 2.22 (no .0/.1) revision of jackson-annotations, so we
+                 keep a dedicated property for it. The BOM itself remains the canonical
+                 source for every other jackson artifact. -->
+        <jackson-annotations.version>2.22</jackson-annotations.version>
         <junit-jupiter.version>6.1.0</junit-jupiter.version>
         <junit.version>4.13.2</junit.version>
         <lombok.version>1.18.46</lombok.version>
@@ -134,15 +139,14 @@
                 <groupId>com.squareup.okhttp3</groupId>
                 <artifactId>okhttp</artifactId>
             <version>${okhttp.version}</version></dependency>
-            <!-- For Jackson: the imported jackson-bom exposes its own property
-                 'jackson.version.annotations' (which Jackson 2.20+ decoupled from the patch
-                 line). We reference that property directly so the BOM stays the single
-                 source of truth: a bump of jackson-bom.version updates the BOM, the BOM
-                 in turn updates jackson.version.annotations, and this dependency follows. -->
+            <!-- For Jackson: BOM import above governs every jackson artifact; for
+                 jackson-annotations we pin via the dedicated property because Jackson
+                 2.20+ decoupled annotations from the patch line and the mirror exposes
+                 only the 2.22 revision. -->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-                <version>${jackson-bom.version}</version>
+                <version>${jackson-annotations.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
