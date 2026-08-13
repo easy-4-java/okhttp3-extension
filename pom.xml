@@ -63,11 +63,7 @@
         <caffeine.version>3.2.4</caffeine.version>
         <checker-qual.version>4.2.1</checker-qual.version>
         <commons-lang.version>2.6</commons-lang.version>
-        <jackson-bom.version>2.22.1</jackson-bom.version>
-        <!-- Jackson 2.20+ detaches annotations from the patch-version line: even when the
-                 BOM resolves to 2.22.1, jackson-annotations stays on 2.22 (no patch suffix).
-                 Pin this explicitly so the artifact exists on the configured mirror. -->
-        <jackson-annotations.version>2.22</jackson-annotations.version>
+        <jackson-bom.version>2.22.0</jackson-bom.version>
         <junit-jupiter.version>6.1.0</junit-jupiter.version>
         <junit.version>4.13.2</junit.version>
         <lombok.version>1.18.46</lombok.version>
@@ -138,12 +134,15 @@
                 <groupId>com.squareup.okhttp3</groupId>
                 <artifactId>okhttp</artifactId>
             <version>${okhttp.version}</version></dependency>
-            <!-- For Jackson: aligned with the BOM but Jackson 2.20+ uses an annotations version
-                 that no longer follows the patch line (see jackson-annotations.version). -->
+            <!-- For Jackson: the imported jackson-bom exposes its own property
+                 'jackson.version.annotations' (which Jackson 2.20+ decoupled from the patch
+                 line). We reference that property directly so the BOM stays the single
+                 source of truth: a bump of jackson-bom.version updates the BOM, the BOM
+                 in turn updates jackson.version.annotations, and this dependency follows. -->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-                <version>${jackson-annotations.version}</version>
+                <version>${jackson-bom.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -355,6 +354,7 @@
                     <configuration>
                         <skip>false</skip>
                         <skipTests>false</skipTests>
+                        <!--suppress UnresolvedMavenProperty -->
                         <argLine>${argLine} -Xmx1024m -Dfile.encoding=UTF-8</argLine>
                         <additionalClasspathElements>
                             <additionalClasspathElement>${basedir}/target/test-classes</additionalClasspathElement>
