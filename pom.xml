@@ -5,9 +5,9 @@
     <artifactId>okhttp3-extension</artifactId>
     <name>${project.groupId}:${project.artifactId}</name>
     <url>https://github.com/easy-4-java/${project.artifactId}</url>
-    <version>1.0.x.20260915-SNAPSHOT</version>
+    <version>2.0.x.20260915-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <description>OkHttp3 Extensions - SSL, Interceptor, Cookie and more</description>
+    <description>OkHttp3 Extensions - independent of Spring Boot, JDK 17 line</description>
 
     <!-- 开源协议采用 Apache 2.0 协议 -->
     <licenses>
@@ -40,7 +40,7 @@
 
     <properties>
         <!-- ═══ 第一段: 基础属性（自然排序）═══ -->
-        <java.version>1.8</java.version>
+        <java.version>17</java.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <maven.version>3.9.16</maven.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -48,11 +48,16 @@
 
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- Dependency versions -->
-        <caffeine.version>2.9.3</caffeine.version>
-        <checker-qual.version>3.55.1</checker-qual.version>
+        <caffeine.version>3.2.4</caffeine.version>
+        <checker-qual.version>4.2.1</checker-qual.version>
         <commons-lang.version>2.6</commons-lang.version>
-        <jackson-bom.version>2.18.9</jackson-bom.version>
-        <junit-jupiter.version>5.11.4</junit-jupiter.version>
+        <jackson-bom.version>2.22.1</jackson-bom.version>
+        <!-- Jackson 2.20+ decoupled annotations from the patch-version line; the mirror
+                 only mirrors the 2.22 (no .0/.1) revision of jackson-annotations, so we
+                 keep a dedicated property for it. The BOM itself remains the canonical
+                 source for every other jackson artifact. -->
+        <jackson-annotations.version>2.22</jackson-annotations.version>
+        <junit-jupiter.version>6.1.0</junit-jupiter.version>
         <junit.version>4.13.2</junit.version>
         <lombok.version>1.18.46</lombok.version>
         <okhttp.version>4.12.0</okhttp.version>
@@ -121,13 +126,14 @@
                 <groupId>com.squareup.okhttp3</groupId>
                 <artifactId>okhttp</artifactId>
             <version>${okhttp.version}</version></dependency>
-            <!-- For Jackson: explicit version kept in lockstep with the imported jackson-bom
-                 so older Maven model validators still resolve the artifact in <dependencies>;
-                 the BOM itself remains the single source of truth for upgrades. -->
+            <!-- For Jackson: BOM import above governs every jackson artifact; for
+                 jackson-annotations we pin via the dedicated property because Jackson
+                 2.20+ decoupled annotations from the patch line and the mirror exposes
+                 only the 2.22 revision. -->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-                <version>${jackson-bom.version}</version>
+                <version>${jackson-annotations.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -174,8 +180,8 @@
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-inline</artifactId>
-            <version>4.11.0</version>
+            <artifactId>mockito-core</artifactId>
+            <version>5.21.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -344,6 +350,7 @@
                     <configuration>
                         <skip>false</skip>
                         <skipTests>false</skipTests>
+                        <!--suppress UnresolvedMavenProperty -->
                         <argLine>${argLine} -Xmx1024m -Dfile.encoding=UTF-8</argLine>
                         <additionalClasspathElements>
                             <additionalClasspathElement>${basedir}/target/test-classes</additionalClasspathElement>
@@ -490,8 +497,6 @@
             </activation>
             <properties>
                 <additionalparam>-Xdoclint:none -Xlint:unchecked</additionalparam>
-        <caffeine.version>2.9.3</caffeine.version>
-        <checker-qual.version>3.48.3</checker-qual.version>
             </properties>
         </profile>
         <!-- 发布到 Maven Central Portal：mvn -Prelease deploy（GPG 签名 + 源码 + Javadoc + Central 发布插件） -->
